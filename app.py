@@ -238,5 +238,11 @@ def register_routes(app):
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=5001, help="Port to run Flask server")
+    args = parser.parse_args()
+
     app = create_app()
-    app.run(debug=True, port=5001, host="0.0.0.0")
+    app.run(debug=True, port=args.port, host="0.0.0.0")

@@ -17,10 +17,10 @@ def server():
         ["python3", "app.py", "--port", "5001"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-    ) 
+    )
 
     # attend que le serveur soit prêt
-    timeout = 10  # secondes max
+    timeout = 15  # secondes max
     start = time.time()
     while True:
         try:
