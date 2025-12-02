@@ -1,0 +1,65 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest selenium webdriver-manager flake8
+
+      - name: Lint code
+        run: flake8 .
+
+      - name: Run unit and integration tests
+        run: |
+          pytest tests/test_unit.py -v
+          pytest tests/test_integration.py -v
+
+      - name: Run E2E tests (Selenium headless)
+        run: |
+          pytest tests/test_e2e.py -v
+
+      - name: Build Docker image (validate)
+        run: docker build -t flask-taskmanager:test .
+
+  docker-deploy:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: docker build -t louiseLV/flask-taskmanager:latest .
+
+      - name: Push Docker image
+        run: docker push louiseLV/flask-taskmanager:latest
