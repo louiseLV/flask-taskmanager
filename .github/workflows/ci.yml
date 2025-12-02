@@ -34,12 +34,12 @@ jobs:
 
       - name: Run unit and integration tests
         run: |
-          pytest tests/test_unit.py -v
-          pytest tests/test_integration.py -v
+          PYTHONPATH=. pytest tests/test_unit.py -v
+          PYTHONPATH=. pytest tests/test_integration.py -v
 
       - name: Run E2E tests (Selenium headless)
         run: |
-          pytest tests/test_e2e.py -v
+          PYTHONPATH=. pytest tests/test_e2e.py -v
 
       - name: Build Docker image (validate)
         run: docker build -t flask-taskmanager:test .
