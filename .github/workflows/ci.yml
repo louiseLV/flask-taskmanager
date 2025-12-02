@@ -42,8 +42,13 @@ jobs:
           export FLASK_APP=app.py
           export FLASK_RUN_HOST=0.0.0.0
           export FLASK_RUN_PORT=5001
-          nohup flask run &
-          sleep 5
+          nohup flask run > flask.log 2>&1 &
+          timeout=15
+          until curl -s http://127.0.0.1:5001/login || [ $timeout -le 0 ]; do
+          echo "Waiting for Flask..."
+          sleep 1
+          timeout=$((timeout-1))
+          done
 
       - name: Run E2E tests
         run: |
