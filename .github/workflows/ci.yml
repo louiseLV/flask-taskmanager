@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: ${{ secrets.ENV_POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.ENV_POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.ENV_POSTGRES_DB }}
+          POSTGRES_USER: louiselavergne
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: taskmanager
         ports:
           - "5432:5432"
         options: >-
@@ -27,7 +27,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://${{ secrets.ENV_POSTGRES_USER }}:${{ secrets.ENV_POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.ENV_POSTGRES_DB }}
+      DATABASE_URL: postgresql://louiselavergne:pass@localhost:5432/taskmanager
 
     steps:
       - uses: actions/checkout@v4
@@ -39,35 +39,31 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest selenium webdriver-manager requests flake8
+          pip install pytest selenium webdriver-manager flake8 requests
 
       - name: Lint code
         run: flake8 .
 
-      - name: Install Google Chrome
+      - name: Run unit and integration tests
+        run: |
+          PYTHONPATH=. pytest tests/test_unit.py -v
+          PYTHONPATH=. pytest tests/test_integration.py -v
+
+      - name: Install Chrome for E2E
         run: |
           sudo apt-get update
           sudo apt-get install -y wget gnupg
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | \
+            sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      - name: Start Flask server
-        run: |
-          python app.py &
-          sleep 5  # attendre que le serveur démarre
-
-      - name: Run Unit tests
-        run: pytest tests/test_unit.py -v
-
-      - name: Run Integration tests
-        run: pytest tests/test_integration.py -v
-
       - name: Run E2E tests
-        run: pytest tests/test_e2e.py -v
+        run: |
+          PYTHONPATH=. pytest tests/test_e2e.py -v
 
       - name: Build Docker image (validate)
         run: docker build -t flask-taskmanager:test .
@@ -86,9 +82,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/flask-taskmanager:latest
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/flask-taskmanager:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-taskmanager:latest
+
