@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
-BASE_URL = "http://127.0.0.1:5001"
+BASE_URL = "http://127.0.0.1:500"
 
 
 @pytest.fixture(scope="module")
@@ -24,7 +24,7 @@ def server():
     start = time.time()
     while True:
         try:
-            requests.get("http://127.0.0.1:5001/login")
+            requests.get("http://127.0.0.1:500/login")
             break  # serveur prêt
         except requests.ConnectionError:
             if time.time() - start > timeout:
