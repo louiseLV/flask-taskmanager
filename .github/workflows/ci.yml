@@ -61,6 +61,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
+      - name: Start Flask server
+        run: |
+          python3 app.py &
+          sleep 5  # laisse le temps au serveur de démarrer
+          
       - name: Run E2E tests
         run: |
           PYTHONPATH=. pytest tests/test_e2e.py -v
