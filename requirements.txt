@@ -4,3 +4,5 @@ Werkzeug==3.0.1
 psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 requests==2.31.0
+selenium==4.11.2
+webdriver-manager==4.8.6
