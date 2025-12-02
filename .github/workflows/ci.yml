@@ -68,7 +68,7 @@ jobs:
         run: python -m pytest tests/test_integration.py -v
 
       - name: E2E tests
-        run: python -m pytest tests/test_e2e.py -v
+        run: pytest tests/test_e2e.py -v
 
 
   build:
