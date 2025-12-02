@@ -1,6 +1,7 @@
 import time
 import pytest
 import subprocess
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -12,13 +13,26 @@ BASE_URL = "http://127.0.0.1:5001"
 
 @pytest.fixture(scope="module")
 def server():
-    # démarre le serveur Flask
     proc = subprocess.Popen(
-        ["python3", "app.py", "--port", "5001"],
+        ["python3", "app.py"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    time.sleep(2)  
+
+    # attend que le serveur soit prêt
+    timeout = 10  # secondes max
+    start = time.time()
+    while True:
+        try:
+            requests.get("http://127.0.0.1:5001/login")
+            break  # serveur prêt
+        except requests.ConnectionError:
+            if time.time() - start > timeout:
+                proc.terminate()
+                proc.wait()
+                raise RuntimeError("Server did not start in time")
+            time.sleep(0.5)
+
     yield
     proc.terminate()
     proc.wait()
