@@ -20,7 +20,7 @@ def setup_user():
         BASE_URL + "/register",
         data={"username": "alice", "password": "secret", "confirm": "secret"},
     )
-    time.sleep(0.5)
+    time.sleep(5)
 
 
 @pytest.fixture(scope="module")
