@@ -1,7 +1,7 @@
 import pytest
 import uuid
 from app import create_app, db
-from models import User, Task
+
 
 @pytest.fixture
 def app():
@@ -9,7 +9,6 @@ def app():
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "WTF_CSRF_ENABLED": False,
-        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     }
     app = create_app(test_config)
     with app.app_context():
@@ -17,10 +16,11 @@ def app():
         yield app
         db.drop_all()
 
+
 @pytest.fixture
 def client(app):
-    """Client de test Flask"""
     return app.test_client()
+
 
 def test_register_login_and_create_task(client):
     username = "user_" + str(uuid.uuid4())[:8]
