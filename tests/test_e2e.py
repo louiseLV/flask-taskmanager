@@ -1,99 +1,78 @@
+# tests/test_e2e.py
 import time
 import pytest
-import subprocess
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 BASE_URL = "http://127.0.0.1:5000"
 
 
-@pytest.fixture(scope="module")
-def server():
-    proc = subprocess.Popen(
-        ["python3", "app.py", "--no-reload"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+@pytest.fixture(scope="module", autouse=True)
+def setup_user():
+    """Créer un utilisateur test avant tous les tests E2E."""
+    requests.post(
+        BASE_URL + "/register",
+        data={"username": "alice", "password": "secret", "confirm": "secret"},
     )
-
-    timeout = 15
-    start = time.time()
-    while True:
-        try:
-            requests.get("http://127.0.0.1:5000/login")
-            break
-        except requests.ConnectionError:
-            if time.time() - start > timeout:
-                proc.terminate()
-                proc.wait()
-                raise RuntimeError("Server did not start in time")
-            time.sleep(0.5)
-
-    yield
-    proc.terminate()
-    proc.wait()
+    time.sleep(0.5)
 
 
 @pytest.fixture(scope="module")
 def browser():
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox") 
-    chrome_options.add_argument("--disable-dev-shm-usage") 
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()), options=chrome_options
+    )
+
     yield driver
     driver.quit()
 
 
-def test_login_flow(browser, server):
+def test_login_flow(browser):
     browser.get(BASE_URL + "/login")
 
-    username = browser.find_element(By.NAME, "username")
-    password = browser.find_element(By.NAME, "password")
-    submit = browser.find_element(By.TAG_NAME, "button")
-
-    username.send_keys("louise")
-    password.send_keys("secret")
-    submit.click()
+    browser.find_element(By.NAME, "username").send_keys("alice")
+    browser.find_element(By.NAME, "password").send_keys("secret")
+    browser.find_element(By.TAG_NAME, "button").click()
 
     time.sleep(1)
 
     assert browser.current_url.endswith("/")
 
 
-def test_create_task_from_ui(browser, server):
+def test_create_task_from_ui(browser):
     browser.get(BASE_URL + "/tasks/new")
 
-    title = browser.find_element(By.NAME, "title")
-    description = browser.find_element(By.NAME, "description")
-    submit = browser.find_element(By.TAG_NAME, "button")
-
-    title.send_keys("Write Selenium test")
-    description.send_keys("E2E test created via UI")
-    submit.click()
+    browser.find_element(By.NAME, "title").send_keys("Write Selenium test")
+    browser.find_element(By.NAME, "description").send_keys("E2E test created via UI")
+    browser.find_element(By.TAG_NAME, "button").click()
 
     time.sleep(1)
 
-    page_source = browser.page_source
-    assert "Write Selenium test" in page_source
+    assert "Write Selenium test" in browser.page_source
 
 
-def test_toggle_task_from_ui(browser, server):
+def test_toggle_task_from_ui(browser):
     browser.get(BASE_URL + "/")
 
     toggle_buttons = browser.find_elements(
         By.CSS_SELECTOR, "form[action*='toggle'] button"
     )
-
     assert len(toggle_buttons) > 0
 
-    first_button = toggle_buttons[0]
-    first_button.click()
-
+    toggle_buttons[0].click()
     time.sleep(1)
 
     assert "Task status updated" in browser.page_source
+
