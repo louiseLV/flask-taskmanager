@@ -36,14 +36,7 @@ jobs:
         run: |
           PYTHONPATH=. pytest tests/test_unit.py -v
           PYTHONPATH=. pytest tests/test_integration.py -v
-  
-      - name: Start Flask server
-        run: |
-          export FLASK_APP=app.py
-          export FLASK_ENV=development
-          flask run &
-          sleep 5  # Wait for the server to start
-
+          
       - name: Run E2E tests
         run: |
           PYTHONPATH=. pytest tests/test_e2e.py -v
