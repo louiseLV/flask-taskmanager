@@ -1,5 +1,6 @@
 import time
 import pytest
+import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -8,6 +9,18 @@ from selenium.webdriver.chrome.options import Options
 
 BASE_URL = "http://127.0.0.1:5001"
 
+@pytest.fixture(scope="module")
+def server():
+    # démarre le serveur Flask
+    proc = subprocess.Popen(
+        ["python3", "app.py", "--port", "5001"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    time.sleep(2)  
+    yield
+    proc.terminate()
+    proc.wait()
 
 @pytest.fixture(scope="module")
 def browser():
@@ -15,10 +28,10 @@ def browser():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox") 
     chrome_options.add_argument("--disable-dev-shm-usage") 
+    chrome_options.add_argument("--window-size=1920,1080")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     yield driver
     driver.quit()
-
 
 def test_login_flow(browser):
     browser.get(BASE_URL + "/login")
