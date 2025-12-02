@@ -62,13 +62,13 @@ jobs:
 
       # Run tests
       - name: Unit tests
-        run: pytest tests/test_unit.py -v
+        run: python -m pytest tests/test_unit.py -v
 
       - name: Integration tests
-        run: pytest tests/test_integration.py -v
+        run: python -m pytest tests/test_integration.py -v
 
       - name: E2E tests
-        run: pytest tests/test_e2e.py -v
+        run: python -m pytest tests/test_e2e.py -v
 
 
   build:

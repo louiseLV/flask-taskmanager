@@ -1,4 +1,3 @@
-# tests/test_unit.py
 from datetime import date, timedelta
 from app import _build_postgres_uri
 from models import Task, User
