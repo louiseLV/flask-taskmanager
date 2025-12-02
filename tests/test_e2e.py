@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 
 BASE_URL = "http://127.0.0.1:5001"
 
+
 @pytest.fixture(scope="module")
 def server():
     # démarre le serveur Flask
@@ -22,6 +23,7 @@ def server():
     proc.terminate()
     proc.wait()
 
+
 @pytest.fixture(scope="module")
 def browser():
     chrome_options = Options()
@@ -32,6 +34,7 @@ def browser():
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     yield driver
     driver.quit()
+
 
 def test_login_flow(browser):
     browser.get(BASE_URL + "/login")
