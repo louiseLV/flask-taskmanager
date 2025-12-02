@@ -14,10 +14,10 @@ BASE_URL = "http://127.0.0.1:5001"
 @pytest.fixture(scope="module")
 def server():
     proc = subprocess.Popen(
-        ["python3", "app.py"],
+        ["python3", "app.py", "--port", "5001"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-    )
+)
 
     # attend que le serveur soit prêt
     timeout = 10  # secondes max
@@ -50,7 +50,7 @@ def browser():
     driver.quit()
 
 
-def test_login_flow(browser):
+def test_login_flow(browser, server):
     browser.get(BASE_URL + "/login")
 
     username = browser.find_element(By.NAME, "username")
@@ -66,7 +66,7 @@ def test_login_flow(browser):
     assert browser.current_url.endswith("/")
 
 
-def test_create_task_from_ui(browser):
+def test_create_task_from_ui(browser, server):
     browser.get(BASE_URL + "/tasks/new")
 
     title = browser.find_element(By.NAME, "title")
@@ -83,7 +83,7 @@ def test_create_task_from_ui(browser):
     assert "Write Selenium test" in page_source
 
 
-def test_toggle_task_from_ui(browser):
+def test_toggle_task_from_ui(browser, server):
     browser.get(BASE_URL + "/")
 
     toggle_buttons = browser.find_elements(
