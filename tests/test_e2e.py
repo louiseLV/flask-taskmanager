@@ -75,4 +75,3 @@ def test_toggle_task_from_ui(browser):
     time.sleep(1)
 
     assert "Task status updated" in browser.page_source
-
