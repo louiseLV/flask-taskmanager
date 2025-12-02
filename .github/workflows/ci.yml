@@ -37,14 +37,17 @@ jobs:
           PYTHONPATH=. pytest tests/test_unit.py -v
           PYTHONPATH=. pytest tests/test_integration.py -v
 
-      - name: Start Flask server
+      - name: Start Flask server and run tests
         run: |
-          nohup python3 app.py --port 5001 &
-          sleep 5  
+          python3 app.py --port 5001 &
+          SERVER_PID=$!
+          echo "Flask PID: $SERVER_PID"
+          sleep 5 
   
       - name: Run E2E tests (Selenium headless)
         run: |
           PYTHONPATH=. pytest tests/test_e2e.py -v
+          kill $SERVER_PID
 
       - name: Build Docker image (validate)
         run: docker build -t flask-taskmanager:test .
