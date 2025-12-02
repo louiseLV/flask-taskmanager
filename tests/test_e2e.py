@@ -40,39 +40,41 @@ def browser():
     driver.quit()
 
 
-def test_login_flow(browser):
+def login_user(browser):
+    """Helper pour connecter l'utilisateur via le navigateur."""
     browser.get(BASE_URL + "/login")
-
     browser.find_element(By.NAME, "username").send_keys("alice")
     browser.find_element(By.NAME, "password").send_keys("secret")
     browser.find_element(By.TAG_NAME, "button").click()
-
     time.sleep(1)
 
+
+def test_login_flow(browser):
+    browser.get(BASE_URL + "/login")
+    browser.find_element(By.NAME, "username").send_keys("alice")
+    browser.find_element(By.NAME, "password").send_keys("secret")
+    browser.find_element(By.TAG_NAME, "button").click()
+    time.sleep(1)
     assert browser.current_url.endswith("/")
 
 
 def test_create_task_from_ui(browser):
+    login_user(browser)  # ← AJOUTER ICI
     browser.get(BASE_URL + "/tasks/new")
-
     browser.find_element(By.NAME, "title").send_keys("Write Selenium test")
     browser.find_element(By.NAME, "description").send_keys("E2E test created via UI")
     browser.find_element(By.TAG_NAME, "button").click()
-
     time.sleep(1)
-
     assert "Write Selenium test" in browser.page_source
 
 
 def test_toggle_task_from_ui(browser):
+    login_user(browser)  # ← AJOUTER ICI
     browser.get(BASE_URL + "/")
-
     toggle_buttons = browser.find_elements(
         By.CSS_SELECTOR, "form[action*='toggle'] button"
     )
     assert len(toggle_buttons) > 0
-
     toggle_buttons[0].click()
     time.sleep(1)
-
     assert "Task status updated" in browser.page_source
