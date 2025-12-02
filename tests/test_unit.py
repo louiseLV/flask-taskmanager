@@ -1,7 +1,7 @@
-import pytest
 from datetime import date, timedelta
 from models import Task, User
 from app import _build_postgres_uri
+
 
 def test_task_is_overdue():
     task = Task(due_date=date.today() - timedelta(days=1))
@@ -17,11 +17,13 @@ def test_task_is_overdue():
     task_done.is_completed = True
     assert task_done.is_overdue() is False
 
+
 def test_user_password():
     user = User()
     user.set_password("secret")
     assert user.check_password("secret") is True
     assert user.check_password("wrong") is False
+
 
 def test_build_postgres_uri(monkeypatch):
     monkeypatch.setenv("POSTGRES_USER", "louiselavergne")

@@ -13,7 +13,7 @@ from flask import (
     g,
 )
 from dotenv import load_dotenv
-from extensions import db 
+from extensions import db
 
 load_dotenv()
 
@@ -29,13 +29,17 @@ def _build_postgres_uri() -> str:
     port = os.environ.get("POSTGRES_PORT", "5432")
     name = os.environ.get("POSTGRES_DB", "taskmanager")
 
-    return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
+    return (
+        f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
+    )
 
 
 def create_app():
     app = Flask(__name__)
 
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-unsafe-secret")
+    app.config["SECRET_KEY"] = os.environ.get(
+        "SECRET_KEY", "dev-unsafe-secret"
+    )
     app.config["SQLALCHEMY_DATABASE_URI"] = _build_postgres_uri()
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -47,7 +51,6 @@ def create_app():
 
     register_routes(app)
     return app
-
 
 
 def login_required(view):
@@ -108,7 +111,9 @@ def register_routes(app):
                 user.set_password(password)
                 db.session.add(user)
                 db.session.commit()
-                flash("Registration successful. Please log in.", "success")
+                flash(
+                    "Registration successful. Please log in.", "success"
+                )
                 return redirect(url_for("login"))
 
         return render_template("register.html")
@@ -155,7 +160,9 @@ def register_routes(app):
                 try:
                     due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
                 except ValueError:
-                    flash("Invalid date format. Use YYYY-MM-DD.", "error")
+                    flash(
+                        "Invalid date format. Use YYYY-MM-DD.", "error"
+                    )
                     return render_template("task_form.html", task=None)
 
             task = Task(
@@ -191,7 +198,9 @@ def register_routes(app):
                 try:
                     due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
                 except ValueError:
-                    flash("Invalid date format. Use YYYY-MM-DD.", "error")
+                    flash(
+                        "Invalid date format. Use YYYY-MM-DD.", "error"
+                    )
                     return render_template("task_form.html", task=task)
 
             task.title = title
