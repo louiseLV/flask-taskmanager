@@ -8,13 +8,13 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
-BASE_URL = "http://127.0.0.1:5001"
+BASE_URL = "http://127.0.0.1:5000"
 
 
 @pytest.fixture(scope="module")
 def server():
     proc = subprocess.Popen(
-        ["python3", "app.py", "--port", "5001"],
+        ["python3", "app.py"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -23,7 +23,7 @@ def server():
     start = time.time()
     while True:
         try:
-            requests.get("http://127.0.0.1:5001/login")
+            requests.get("http://127.0.0.1:5000/login")
             break
         except requests.ConnectionError:
             if time.time() - start > timeout:
