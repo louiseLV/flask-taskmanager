@@ -23,11 +23,11 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Create venv and install dependencies
+      - name: Install dependencies
         run: |
-          python3 -m venv venv
-          ./venv/bin/pip install --upgrade pip
-          ./venv/bin/pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest selenium webdriver-manager flake8
 
       - name: Lint code
         run: flake8 .
@@ -39,7 +39,6 @@ jobs:
   
       - name: Start Flask server
         run: |
-          source venv/bin/activate
           export FLASK_APP=app.py
           export FLASK_RUN_HOST=0.0.0.0
           export FLASK_RUN_PORT=5001
@@ -48,7 +47,6 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          source venv/bin/activate
           PYTHONPATH=. pytest tests/test_e2e.py -v
 
       - name: Build Docker image (validate)
