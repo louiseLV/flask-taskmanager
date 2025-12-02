@@ -1,19 +1,10 @@
+# app.py
 import os
 from datetime import datetime, date
 from functools import wraps
-from extensions import db
-
-from flask import (
-    Flask,
-    render_template,
-    redirect,
-    url_for,
-    request,
-    session,
-    flash,
-    g,
-)
+from flask import Flask, render_template, redirect, url_for, request, session, flash, g
 from dotenv import load_dotenv
+from extensions import db
 
 load_dotenv()
 
@@ -32,9 +23,6 @@ def _build_postgres_uri() -> str:
     return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
 
 
-# app.py
-
-
 def create_app(config=None):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-unsafe-secret")
@@ -47,11 +35,10 @@ def create_app(config=None):
     db.init_app(app)
 
     with app.app_context():
-
+        from models import User, Task
         db.create_all()
 
     register_routes(app)
-
     return app
 
 
@@ -61,7 +48,6 @@ def login_required(view):
         if "user_id" not in session:
             return redirect(url_for("login", next=request.path))
         return view(**kwargs)
-
     return wrapped_view
 
 
@@ -76,6 +62,7 @@ def register_routes(app):
         else:
             g.user = User.query.get(user_id)
 
+    # -------------------- ROUTES -------------------- #
     @app.route("/")
     @login_required
     def index():
@@ -88,12 +75,7 @@ def register_routes(app):
             query = query.filter_by(is_completed=True)
 
         tasks = query.order_by(Task.due_date.asc().nullslast()).all()
-        return render_template(
-            "index.html",
-            tasks=tasks,
-            status_filter=status_filter,
-            today=date.today(),
-        )
+        return render_template("index.html", tasks=tasks, status_filter=status_filter, today=date.today())
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
@@ -163,12 +145,7 @@ def register_routes(app):
                     flash("Invalid date format. Use YYYY-MM-DD.", "error")
                     return render_template("task_form.html", task=None)
 
-            task = Task(
-                title=title,
-                description=description or None,
-                due_date=due_date,
-                user_id=g.user.id,
-            )
+            task = Task(title=title, description=description or None, due_date=due_date, user_id=g.user.id)
             db.session.add(task)
             db.session.commit()
             flash("Task created.", "success")
@@ -176,11 +153,19 @@ def register_routes(app):
 
         return render_template("task_form.html", task=None)
 
+    @app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
+    @login_required
+    def toggle_task(task_id):
+        task = Task.query.filter_by(id=task_id, user_id=g.user.id).first_or_404()
+        task.is_completed = not task.is_completed
+        db.session.commit()
+        flash("Task status updated.", "success")
+        return redirect(url_for("index"))
+
     @app.route("/tasks/<int:task_id>/edit", methods=["GET", "POST"])
     @login_required
     def edit_task(task_id):
         task = Task.query.filter_by(id=task_id, user_id=g.user.id).first_or_404()
-
         if request.method == "POST":
             title = request.form.get("title", "").strip()
             description = request.form.get("description", "").strip()
@@ -204,20 +189,10 @@ def register_routes(app):
             task.due_date = due_date
             task.is_completed = is_completed
             db.session.commit()
-
             flash("Task updated.", "success")
             return redirect(url_for("index"))
 
         return render_template("task_form.html", task=task)
-
-    @app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
-    @login_required
-    def toggle_task(task_id):
-        task = Task.query.filter_by(id=task_id, user_id=g.user.id).first_or_404()
-        task.is_completed = not task.is_completed
-        db.session.commit()
-        flash("Task status updated.", "success")
-        return redirect(url_for("index"))
 
     @app.route("/tasks/<int:task_id>/delete", methods=["POST"])
     @login_required
