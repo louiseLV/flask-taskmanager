@@ -19,13 +19,12 @@ def server():
         stderr=subprocess.PIPE,
     )
 
-    # attend que le serveur soit prêt
-    timeout = 15  # secondes max
+    timeout = 15
     start = time.time()
     while True:
         try:
             requests.get("http://127.0.0.1:5001/login")
-            break  # serveur prêt
+            break
         except requests.ConnectionError:
             if time.time() - start > timeout:
                 proc.terminate()

@@ -36,7 +36,14 @@ jobs:
         run: |
           PYTHONPATH=. pytest tests/test_unit.py -v
           PYTHONPATH=. pytest tests/test_integration.py -v
-          
+      
+      - name: Install Chrome
+        run: |
+          sudo apt update
+          sudo apt install -y wget unzip xvfb libxi6 libgconf-2-4
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt --fix-broken install -y
+
       - name: Run E2E tests
         run: |
           PYTHONPATH=. pytest tests/test_e2e.py -v
