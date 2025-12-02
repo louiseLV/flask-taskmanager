@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, date
+from functools import wraps
 from extensions import db
 
 from flask import (
