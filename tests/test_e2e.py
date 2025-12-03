@@ -17,7 +17,7 @@ def setup_user():
     """CrÃ©er un utilisateur test avant tous les tests E2E."""
     requests.post(
         BASE_URL + "/register",
-        data={"username": "alice", "password": "secret", "confirm": "secret"},
+        data={"username": "louiselavergne", "password": "pass", "confirm": "pass"},
     )
     time.sleep(0.5)
 
@@ -42,8 +42,8 @@ def browser():
 def test_login_flow(browser):
     browser.get(BASE_URL + "/login")
 
-    browser.find_element(By.NAME, "username").send_keys("alice")
-    browser.find_element(By.NAME, "password").send_keys("secret")
+    browser.find_element(By.NAME, "username").send_keys("louiselavergne")
+    browser.find_element(By.NAME, "password").send_keys("pass")
     browser.find_element(By.TAG_NAME, "button").click()
 
     time.sleep(1)
