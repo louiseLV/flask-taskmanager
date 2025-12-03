@@ -32,15 +32,10 @@ jobs:
       - uses: actions/checkout@v4
 
       # Install Chrome
-      - name: Install Google Chrome
+      - name: Install Chromium and ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | \
-            sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y chromium-browser chromium-chromedriver
 
       # Python
       - name: Set up Python
@@ -59,9 +54,6 @@ jobs:
           python app.py > flask.log 2>&1 &
           sleep 5
 
-      - name: Show Flask logs
-        run: cat flask.log
-        
       # Run tests
       - name: Unit tests
         run: python -m pytest tests/test_unit.py -v
