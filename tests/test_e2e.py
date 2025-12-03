@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from app import create_app, db
+from models import User
 
 
 BASE_URL = "http://127.0.0.1:5000"
@@ -14,14 +16,13 @@ BASE_URL = "http://127.0.0.1:5000"
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_user():
-    """CrÃ©er un utilisateur test avant tous les tests E2E."""
-    resp = requests.post(
-        BASE_URL + "/register",
-        data={"username": "louiselavergne", "password": "pass", "confirm": "pass"},
-    )
-    print("REGISTER STATUS =", resp.status_code)
-    print("REGISTER TEXT =", resp.text[:300])
-    time.sleep(0.5)
+    app = create_app()
+    with app.app_context():
+        if not User.query.filter_by(username="louiselavergne").first():
+            user = User(username="louiselavergne")
+            user.set_password("pass")
+            db.session.add(user)
+            db.session.commit()
 
 
 @pytest.fixture(scope="module")
@@ -34,7 +35,8 @@ def browser():
     chrome_options.add_argument("--window-size=1920,1080")
 
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()), options=chrome_options
+        service=Service("/usr/bin/chromedriver"),
+        options=chrome_options
     )
 
     yield driver
