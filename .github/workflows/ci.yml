@@ -54,6 +54,9 @@ jobs:
           python app.py > flask.log 2>&1 &
           sleep 5
 
+      - name: Show Flask logs
+        run: cat flask.log
+
       # Run tests
       - name: Unit tests
         run: python -m pytest tests/test_unit.py -v
