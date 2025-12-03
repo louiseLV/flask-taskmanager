@@ -35,8 +35,7 @@ def browser():
     chrome_options.add_argument("--window-size=1920,1080")
 
     driver = webdriver.Chrome(
-        service=Service("/usr/bin/chromedriver"),
-        options=chrome_options
+        service=Service(ChromeDriverManager().install()), options=chrome_options
     )
 
     yield driver
