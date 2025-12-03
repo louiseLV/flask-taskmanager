@@ -17,7 +17,7 @@ def client():
         yield client
 
 
-def register(client, username="alice", password="secret"):
+def register(client, username="louiselavergne", password="pass"):
     return client.post(
         "/register",
         data={
@@ -29,7 +29,7 @@ def register(client, username="alice", password="secret"):
     )
 
 
-def login(client, username="alice", password="secret"):
+def login(client, username="louiselavergne", password="pass"):
     return client.post(
         "/login",
         data={

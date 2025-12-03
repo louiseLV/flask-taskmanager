@@ -36,13 +36,13 @@ def test_task_is_not_overdue_when_completed_or_no_due_date():
 
 
 def test_user_set_and_check_password():
-    user = User(username="alice")
-    user.set_password("secret123")
+    user = User(username="louiselavergne")
+    user.set_password("pass")
 
     assert user.password_hash is not None
-    assert user.password_hash != "secret123"
+    assert user.password_hash != "pass"
 
-    assert user.check_password("secret123") is True
+    assert user.check_password("pass") is True
     assert user.check_password("wrongpassword") is False
 
 
