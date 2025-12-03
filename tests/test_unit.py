@@ -1,31 +1,68 @@
-import pytest
 from datetime import date, timedelta
-from models import Task, User
 from app import _build_postgres_uri
+from models import Task, User
 
-def test_task_is_overdue():
-    task = Task(due_date=date.today() - timedelta(days=1))
+
+def test_task_is_overdue_when_due_date_in_past_and_not_completed():
+    task = Task(
+        title="Test overdue",
+        user_id=1,
+        due_date=date.today() - timedelta(days=1),
+        is_completed=False,
+    )
+
     assert task.is_overdue() is True
 
-    task_future = Task(due_date=date.today() + timedelta(days=1))
-    assert task_future.is_overdue() is False
 
-    task_none = Task(due_date=None)
-    assert task_none.is_overdue() is False
+def test_task_is_not_overdue_when_completed_or_no_due_date():
+    past_date = date.today() - timedelta(days=1)
 
-    task_done = Task(due_date=date.today() - timedelta(days=5))
-    task_done.is_completed = True
-    assert task_done.is_overdue() is False
+    completed_task = Task(
+        title="Completed",
+        user_id=1,
+        due_date=past_date,
+        is_completed=True,
+    )
 
-def test_user_password():
-    user = User()
-    user.set_password("secret")
-    assert user.check_password("secret") is True
-    assert user.check_password("wrong") is False
+    no_due_date_task = Task(
+        title="No due date",
+        user_id=1,
+        due_date=None,
+        is_completed=False,
+    )
 
-def test_build_postgres_uri(monkeypatch):
-    monkeypatch.setenv("POSTGRES_USER", "louiselavergne")
-    monkeypatch.setenv("POSTGRES_PASSWORD", "pass")
+    assert completed_task.is_overdue() is False
+    assert no_due_date_task.is_overdue() is False
+
+
+def test_user_set_and_check_password():
+    user = User(username="louiselavergne")
+    user.set_password("pass")
+
+    assert user.password_hash is not None
+    assert user.password_hash != "pass"
+
+    assert user.check_password("pass") is True
+    assert user.check_password("wrongpassword") is False
+
+
+def test_build_postgres_uri_uses_database_url_from_env(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://u:p@h:1234/dbname")
+
     uri = _build_postgres_uri()
-    assert "louiselavergne" in uri
-    assert "pass" in uri
+
+    assert uri == "postgresql+psycopg://u:p@h:1234/dbname"
+
+
+def test_build_postgres_uri_builds_from_postgres_env_vars(monkeypatch):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+
+    monkeypatch.setenv("POSTGRES_USER", "myuser")
+    monkeypatch.setenv("POSTGRES_PASSWORD", "mypass")
+    monkeypatch.setenv("POSTGRES_HOST", "myhost")
+    monkeypatch.setenv("POSTGRES_PORT", "5555")
+    monkeypatch.setenv("POSTGRES_DB", "mydb")
+
+    uri = _build_postgres_uri()
+
+    assert uri == "postgresql+psycopg2://myuser:mypass@myhost:5555/mydb"

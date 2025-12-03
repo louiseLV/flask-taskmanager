@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, date
 from functools import wraps
+from extensions import db
 
 from flask import (
     Flask,
@@ -13,7 +14,6 @@ from flask import (
     g,
 )
 from dotenv import load_dotenv
-from extensions import db 
 
 load_dotenv()
 
@@ -32,22 +32,28 @@ def _build_postgres_uri() -> str:
     return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
 
 
-def create_app():
-    app = Flask(__name__)
+# app.py
 
+
+def create_app(config=None):
+    app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-unsafe-secret")
     app.config["SQLALCHEMY_DATABASE_URI"] = _build_postgres_uri()
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    if app.config['TESTING']:
+        app.config['WTF_CSRF_ENABLED'] = False
+    if config:
+        app.config.update(config)
 
     db.init_app(app)
 
     with app.app_context():
-        from models import User, Task  # noqa: F401
+
         db.create_all()
 
     register_routes(app)
-    return app
 
+    return app
 
 
 def login_required(view):
@@ -226,4 +232,4 @@ def register_routes(app):
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=500, host="0.0.0.0")
+    app.run(debug=False, port=5000, host="0.0.0.0", use_reloader=False)
