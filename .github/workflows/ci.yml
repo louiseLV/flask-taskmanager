@@ -34,6 +34,7 @@ jobs:
       # Install Chrome
       - name: Install Chromium and ChromeDriver
         run: |
+          sudo rm /etc/apt/sources.list.d/azure-cli.list || true
           sudo apt-get update
           sudo apt-get install -y chromium-browser chromium-chromedriver
 
