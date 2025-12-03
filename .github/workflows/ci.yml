@@ -54,12 +54,14 @@ jobs:
           pip install -r requirements.txt
           pip install pytest selenium webdriver-manager requests
 
-      # Launch Flask server for E2E
       - name: Start Flask server
         run: |
-          python app.py &
+          python app.py > flask.log 2>&1 &
           sleep 5
 
+      - name: Show Flask logs
+        run: cat flask.log
+        
       # Run tests
       - name: Unit tests
         run: python -m pytest tests/test_unit.py -v
