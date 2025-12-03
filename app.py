@@ -40,7 +40,8 @@ def create_app(config=None):
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-unsafe-secret")
     app.config["SQLALCHEMY_DATABASE_URI"] = _build_postgres_uri()
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+    if app.config['TESTING']:
+        app.config['WTF_CSRF_ENABLED'] = False
     if config:
         app.config.update(config)
 

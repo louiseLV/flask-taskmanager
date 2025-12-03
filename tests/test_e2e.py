@@ -15,10 +15,12 @@ BASE_URL = "http://127.0.0.1:5000"
 @pytest.fixture(scope="module", autouse=True)
 def setup_user():
     """CrÃ©er un utilisateur test avant tous les tests E2E."""
-    requests.post(
+    resp = requests.post(
         BASE_URL + "/register",
         data={"username": "louiselavergne", "password": "pass", "confirm": "pass"},
     )
+    print("REGISTER STATUS =", resp.status_code)
+    print("REGISTER TEXT =", resp.text[:300])
     time.sleep(0.5)
 
 
