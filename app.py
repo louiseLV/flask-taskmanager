@@ -33,6 +33,7 @@ def _build_postgres_uri() -> str:
 
 # app.py
 
+
 def create_app(config=None):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-unsafe-secret")
