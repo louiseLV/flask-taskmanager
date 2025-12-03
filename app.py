@@ -31,9 +31,7 @@ def _build_postgres_uri() -> str:
 
     return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
 
-
 # app.py
-
 
 def create_app(config=None):
     app = Flask(__name__)
